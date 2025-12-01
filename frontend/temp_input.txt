@@ -1,0 +1,13 @@
+                    <!-- User Name Input -->
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                            Your Name (required)
+                        </label>
+                        <input type="text" 
+                               id="userName" 
+                               placeholder="Enter your name"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent">
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <div class="mt-6">

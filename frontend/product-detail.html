@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Details - E-Commerce</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <h1 class="logo">CART</h1>
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Products</a>
+          <a href="#" class="nav-link">Cart (0)</a>
+          <a href="#" class="nav-link">Orders</a>
+          <span class="secure-checkout">Secure Checkout</span>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        <a href="index.html" class="back-link">← Back to Products</a>
+
+        <div class="product-detail" id="productDetail">
+          <div class="loading">Loading product details...</div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>
+          &copy; 2025 E-Commerce Store. Built with AWS Serverless Microservices.
+        </p>
+      </div>
+    </footer>
+
+    <script src="mock-data.js"></script>
+    <script src="app.js"></script>
+    <script>
+      // Load product detail on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        const productId = new URLSearchParams(window.location.search).get("id");
+        if (productId) {
+          loadProductDetail(productId);
+        } else {
+          document.getElementById("productDetail").innerHTML =
+            '<div class="error">Product ID not found. <a href="index.html">Go back to products</a></div>';
+        }
+      });
+    </script>
+  </body>
+</html>

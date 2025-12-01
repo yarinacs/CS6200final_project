@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - CS6620</title>
+    <link rel="stylesheet" href="product/styles.css" />
+    <link rel="stylesheet" href="orders/styles.css" />
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">Shop</h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Enter your name..." id="headerSearch">
+                <button onclick="searchOrders()">🔍</button>
+            </div>
+            <nav class="nav">
+                <a href="products.html" class="nav-link" aria-label="Products">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        <path d="M2 9c2-1 4 0 6-1s4 0 6-1 4 0 6-1" stroke-width="1.5"></path>
+                    </svg>
+                </a>
+                <a href="#" class="nav-link" aria-label="Watchlist">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>
+                    </svg>
+                </a>
+                <a href="basket.html" class="nav-link" aria-label="Cart">
+                    <div style="position: relative;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"></path>
+                        </svg>
+                        <span style="position: absolute; top: -8px; right: -8px; font-size: 0.7rem; font-weight: bold; background: var(--primary-color); color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">0</span>
+                    </div>
+                </a>
+                <a href="order.html" class="nav-link" aria-label="Orders">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                        <path d="M8 12c2-0.5 4 0.5 8 0"></path>
+                        <path d="M8 16c2-0.5 4 0.5 8 0"></path>
+                        <path d="M8 20c2-0.5 4 0.5 6 0"></path>
+                    </svg>
+                </a>
+                <a href="#" class="nav-link" aria-label="Sign In">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </a>
+                <span class="secure-checkout">Secure Checkout</span>
+            </nav>
+        </div>
+    </header>
+
+    <div class="nav-bar">
+        <a href="products.html">🏠 Products</a>
+        <a href="basket.html">🛒 Cart</a>
+        <a href="my-orders.html">📦 My Orders</a>
+        <a href="order.html">👨‍💼 All Orders (Admin)</a>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>My Orders</h1>
+            <p style="color: #565959; font-size: 14px;">Enter your name above to view your personal orders</p>
+        </div>
+
+        <div class="stats-bar" id="statsBar"></div>
+
+        <div class="filter-bar">
+            <select id="timeFilter" onchange="filterByTime()">
+                <option value="all">Orders placed in: All time</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 3 months</option>
+                <option value="365">Last year</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search products in your orders..." style="flex: 1">
+            <button onclick="filterOrders()">Search Orders</button>
+            <button onclick="loadMyOrders()">🔄 Refresh</button>
+        </div>
+
+        <div id="errorMessage"></div>
+        <div id="loadingMessage"></div>
+        <div id="ordersContainer"></div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://3g0qh62cub.execute-api.us-west-2.amazonaws.com/prod/order';
+        let allOrders = [];
+        let currentUserName = '';
+
+        const productImages = {
+            'laptop': 'https://m.media-amazon.com/images/I/61+r3+JstZL._AC_SL1500_.jpg',
+            'iphone': 'https://m.media-amazon.com/images/I/71d7rfSl0wL._AC_SL1500_.jpg',
+            'ipad': 'https://m.media-amazon.com/images/I/61uA2UVnYWL._AC_SL1500_.jpg',
+            'macbook': 'https://m.media-amazon.com/images/I/61TlNi96DpL._AC_SL1500_.jpg'
+        };
+
+        function getProductImage(productName) {
+            const name = productName.toLowerCase();
+            if (name.includes('macbook')) return productImages.macbook;
+            if (name.includes('laptop')) return productImages.laptop;
+            if (name.includes('iphone')) return productImages.iphone;
+            if (name.includes('ipad')) return productImages.ipad;
+            return 'https://via.placeholder.com/120?text=Product';
+        }
+
+        window.onload = () => {
+            const lastUser = localStorage.getItem('lastUserName') || '';
+            if (lastUser) {
+                document.getElementById('headerSearch').value = lastUser;
+                loadMyOrders(lastUser);
+            }
+        };
+
+        async function loadMyOrders(userName) {
+            if (!userName) {
+                userName = document.getElementById('headerSearch').value.trim();
+            }
+            
+            if (!userName) {
+                alert('⚠️ Please enter your name in the search box above!');
+                return;
+            }
+            
+            currentUserName = userName;
+            localStorage.setItem('lastUserName', userName);
+            
+            const loadingDiv = document.getElementById('loadingMessage');
+            const errorDiv = document.getElementById('errorMessage');
+            const ordersDiv = document.getElementById('ordersContainer');
+            
+            loadingDiv.innerHTML = '<div class="loading"><p>Loading orders for ' + userName + '...</p></div>';
+            errorDiv.innerHTML = '';
+            ordersDiv.innerHTML = '';
+
+            try {
+                const response = await fetch(API_ENDPOINT);
+                const data = await response.json();
+                const allOrdersData = data.body || [];
+                
+                allOrders = allOrdersData.filter(order => 
+                    order.userName.toLowerCase() === userName.toLowerCase()
+                );
+                
+                loadingDiv.innerHTML = '';
+                
+                if (allOrders.length === 0) {
+                    ordersDiv.innerHTML = `
+                        <div style="text-align: center; padding: 60px; background: white; border-radius: 8px;">
+                            <div style="font-size: 60px; margin-bottom: 20px;">📦</div>
+                            <h2>No orders found for ${userName}</h2>
+                            <p style="color: #565959; margin: 20px 0;">You haven't placed any orders yet.</p>
+                            <button onclick="window.location.href='products.html'" 
+                                    style="padding: 12px 30px; background: #ffd814; border: 1px solid #fcd200; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                Start Shopping
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('statsBar').innerHTML = '';
+                    return;
+                }
+                
+                displayStats();
+                displayOrders(allOrders);
+            } catch (error) {
+                loadingDiv.innerHTML = '';
+                errorDiv.innerHTML = `<div style="background: #fff5f5; border: 1px solid #feb8b8; color: #c40000; padding: 15px 20px; border-radius: 8px;">Error: ${error.message}</div>`;
+            }
+        }
+
+        function searchOrders() {
+            loadMyOrders();
+        }
+
+        function displayStats() {
+            const total = allOrders.length;
+            const revenue = allOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+            const avgOrder = total > 0 ? revenue / total : 0;
+
+            document.getElementById('statsBar').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">MY TOTAL ORDERS</div>
+                    <div class="stat-value">${total}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">TOTAL SPENT</div>
+                    <div class="stat-value">$${revenue.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">AVERAGE ORDER</div>
+                    <div class="stat-value">$${avgOrder.toFixed(2)}</div>
+                </div>
+            `;
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="no-orders">
+                        <div class="no-orders-icon">📦</div>
+                        <h2>No orders yet</h2>
+                        <p style="color: #565959;">You haven't placed any orders yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sorted = [...orders].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+            container.innerHTML = '<div class="orders-list">' + sorted.map(order => {
+                const orderDate = new Date(order.orderDate);
+                const formattedDate = orderDate.toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                const itemsHtml = (order.items || []).map(item => {
+                    const imageUrl = getProductImage(item.productName);
+                    return `
+                        <div class="order-item">
+                            <img src="${imageUrl}" alt="${item.productName}" class="item-image" onerror="this.src='https://via.placeholder.com/120?text=No+Image'">
+                            <div class="item-details">
+                                <div class="item-name">${item.productName || 'Product'}</div>
+                                <div class="item-price">$${(item.price || 0).toFixed(2)}</div>
+                                <div class="item-quantity">Quantity: ${item.quantity || 1}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-header-item">
+                                <div class="order-header-label">Order Placed</div>
+                                <div class="order-header-value">${formattedDate}</div>
+                            </div>
+                            <div class="order-header-item">
+                                <div class="order-header-label">Total</div>
+                                <div class="order-header-value">$${(order.totalPrice || 0).toFixed(2)}</div>
+                            </div>
+                            <div class="order-header-item">
+                                <div class="order-header-label">Ship To</div>
+                                <div class="order-header-value">${order.userName}</div>
+                            </div>
+                        </div>
+                        <div class="order-body">
+                            <h3 style="font-size: 18px; margin-bottom: 15px; font-weight: 600;">Order Details</h3>
+                            <div class="order-items">${itemsHtml}</div>
+                            <div class="order-actions">
+                                <button class="btn btn-primary">Track Package</button>
+                                <button class="btn btn-secondary">View Order Details</button>
+                                <button class="btn btn-secondary">Leave Seller Feedback</button>
+                                <button class="btn btn-secondary">Write a Product Review</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('') + '</div>';
+        }
+
+        function filterOrders() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allOrders.filter(o =>
+                (o.items || []).some(item => item.productName.toLowerCase().includes(search))
+            );
+            displayOrders(filtered);
+        }
+
+        function filterByTime() {
+            const days = document.getElementById('timeFilter').value;
+            if (days === 'all') {
+                displayOrders(allOrders);
+                return;
+            }
+
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
+
+            const filtered = allOrders.filter(o => new Date(o.orderDate) >= cutoffDate);
+            displayOrders(filtered);
+        }
+    </script>
+</body>
+
+</html>
