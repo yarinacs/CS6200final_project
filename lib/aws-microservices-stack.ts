@@ -5,12 +5,13 @@ import { SwnDatabase } from './database';
 import { SwnEventBus } from './eventbus';
 import { SwnMicroservices } from './microservice';
 import { SwnQueue } from './queue';
+import { SwnAuth } from './auth';
 
 export class AwsMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const database = new SwnDatabase(this, 'Database');    
+    const database = new SwnDatabase(this, 'Database');
 
     const microservices = new SwnMicroservices(this, 'Microservices', {
       productTable: database.productTable,
@@ -25,20 +26,23 @@ export class AwsMicroservicesStack extends Stack {
       paymentConsumer: microservices.paymentMicroservice
     });
 
+    const auth = new SwnAuth(this, 'Auth');
+
     const apigateway = new SwnApiGateway(this, 'ApiGateway', {
       productMicroservice: microservices.productMicroservice,
       basketMicroservice: microservices.basketMicroservice,
       orderingMicroservices: microservices.orderingMicroservice,
       inventoryMicroservice: microservices.inventoryMicroservice,
-      paymentMicroservice: microservices.paymentMicroservice
+      paymentMicroservice: microservices.paymentMicroservice,
+      userPool: auth.userPool
     });
-    
+
     const eventbus = new SwnEventBus(this, 'EventBus', {
       publisherFuntion: microservices.basketMicroservice,
       orderQueue: queue.orderQueue,
       inventoryQueue: queue.inventoryQueue,
       paymentQueue: queue.paymentQueue
-    });   
+    });
 
   }
 }

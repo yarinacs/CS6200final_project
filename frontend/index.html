@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>E-Commerce - Product Catalog</title>
   <link rel="stylesheet" href="styles.css" />
+  <script
+    src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.6/dist/amazon-cognito-identity.min.js"></script>
 </head>
 
 <body>
@@ -57,13 +59,20 @@
             <path d="M8 20c2-0.5 4 0.5 6 0"></path>
           </svg>
         </a>
-        <a href="#" class="nav-link" aria-label="Sign In">
+        </a>
+        <a href="#" class="nav-link" id="nav-sign-in"
+          onclick="document.getElementById('auth-modal').style.display='block'" aria-label="Sign In">
           <!-- Hand-drawn User Profile -->
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
+          <span style="margin-left:5px;">Sign In</span>
+        </a>
+        <a href="#" class="nav-link" id="nav-sign-out" onclick="signOut()" style="display:none;" aria-label="Sign Out">
+          <span style="margin-right:5px;" id="user-email-display"></span>
+          Sign Out
         </a>
         <span class="secure-checkout">Secure Checkout</span>
       </nav>
@@ -91,7 +100,47 @@
   </footer>
 
   <script src="mock-data.js"></script>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal"
+    style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4);">
+    <div class="modal-content"
+      style="background-color:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:300px; border-radius:8px;">
+      <span class="close" onclick="document.getElementById('auth-modal').style.display='none'"
+        style="color:#aaa; float:right; font-size:28px; font-weight:bold; cursor:pointer;">&times;</span>
+      <h2>Sign In / Sign Up</h2>
+      <div id="auth-forms">
+        <input type="email" id="auth-email" placeholder="Email" style="width:100%; padding:10px; margin:10px 0;">
+        <input type="password" id="auth-password" placeholder="Password"
+          style="width:100%; padding:10px; margin:10px 0;">
+        <button
+          onclick="signIn(document.getElementById('auth-email').value, document.getElementById('auth-password').value)"
+          class="btn btn-primary" style="width:100%; margin-bottom:10px;">Sign In</button>
+        <button
+          onclick="signUp(document.getElementById('auth-email').value, document.getElementById('auth-password').value)"
+          class="btn btn-secondary" style="width:100%;">Sign Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verify Modal -->
+  <div id="verify-modal" class="modal"
+    style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4);">
+    <div class="modal-content"
+      style="background-color:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:300px; border-radius:8px;">
+      <h2>Verify Email</h2>
+      <p>Please enter the verification code sent to your email.</p>
+      <input type="email" id="verify-email" placeholder="Email" readonly
+        style="width:100%; padding:10px; margin:10px 0; background:#eee;">
+      <input type="text" id="verify-code" placeholder="Verification Code"
+        style="width:100%; padding:10px; margin:10px 0;">
+      <button
+        onclick="verify(document.getElementById('verify-email').value, document.getElementById('verify-code').value)"
+        class="btn btn-primary" style="width:100%;">Verify</button>
+    </div>
+  </div>
 </body>
 
 </html>

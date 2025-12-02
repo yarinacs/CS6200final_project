@@ -3,9 +3,9 @@ function displayCartItems() {
     const emptyState = document.getElementById('empty-state');
     const cartCount = document.getElementById('cart-count');
     const cart = getCart();
-    
+
     console.log('Displaying cart:', cart);
-    
+
     if (cart.length === 0) {
         if (container) container.style.display = 'none';
         if (emptyState) emptyState.classList.remove('hidden');
@@ -13,11 +13,11 @@ function displayCartItems() {
         updateSummary();
         return;
     }
-    
+
     if (container) container.style.display = 'block';
     if (emptyState) emptyState.classList.add('hidden');
     if (cartCount) cartCount.textContent = cart.length;
-    
+
     if (container) {
         container.innerHTML = cart.map((item, index) => `
             <div class="p-6 border-b border-gray-200">
@@ -58,7 +58,7 @@ function displayCartItems() {
             </div>
         `).join('');
     }
-    
+
     updateSummary();
 }
 
@@ -67,14 +67,14 @@ function updateSummary() {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const tax = subtotal * 0.0825;
     const total = subtotal + tax;
-    
+
     const elements = {
         'summary-subtotal': '$' + subtotal.toFixed(2),
         'summary-tax': '$' + tax.toFixed(2),
         'summary-total': '$' + total.toFixed(2),
         'cart-count': cart.reduce((sum, item) => sum + item.quantity, 0)
     };
-    
+
     Object.entries(elements).forEach(([id, value]) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
@@ -84,33 +84,33 @@ function updateSummary() {
 async function handleCheckout() {
     const userNameInput = document.getElementById('userName');
     const userName = userNameInput ? userNameInput.value.trim() : '';
-    
+
     if (!userName) {
         alert('⚠️ Please enter your name!');
         if (userNameInput) userNameInput.focus();
         return;
     }
-    
+
     const cart = getCart();
     if (cart.length === 0) {
         alert('⚠️ Your cart is empty!');
         return;
     }
-    
+
     try {
         console.log('Saving basket to backend...');
         await BasketAPI.save(userName, cart);
-        
+
         console.log('Checking out...');
         await BasketAPI.checkout(userName);
-        
+
         alert(`✅ Order placed successfully!\n\nThank you, ${userName}!\n\nRedirecting to your orders...`);
-        
+
         // 保存用户名到localStorage
         localStorage.setItem('lastUserName', userName);
-        
+
         clearCart();
-        
+
         // 跳转到my-orders.html并自动加载
         setTimeout(() => {
             localStorage.setItem('checkoutUserName', userName); window.location.href = 'payment-checkout.html';
@@ -124,7 +124,7 @@ async function handleCheckout() {
 async function saveBasket() {
     const userName = prompt('Enter username to save basket:');
     if (!userName) return;
-    
+
     try {
         await BasketAPI.save(userName, getCart());
         alert('✅ Basket saved to backend!');
@@ -136,7 +136,7 @@ async function saveBasket() {
 async function deleteBasket() {
     const userName = prompt('Enter username to delete:');
     if (!userName || !confirm('Delete this basket from backend?')) return;
-    
+
     try {
         await BasketAPI.delete(userName);
         alert('✅ Basket deleted from backend!');
@@ -165,23 +165,25 @@ if (typeof window !== 'undefined') {
     });
 }
 
+
+
 // 跳转到支付页面（不清空购物车）
 async function goToPayment() {
     const userNameInput = document.getElementById('userName');
     const userName = userNameInput ? userNameInput.value.trim() : '';
-    
+
     if (!userName) {
         alert('⚠️ Please enter your name first!');
         if (userNameInput) userNameInput.focus();
         return;
     }
-    
+
     const cart = getCart();
     if (cart.length === 0) {
         alert('⚠️ Your cart is empty!');
         return;
     }
-    
+
     // 保存用户名，跳转到支付页面（不清空购物车）
     localStorage.setItem('checkoutUserName', userName);
     window.location.href = 'payment-checkout.html';

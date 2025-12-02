@@ -430,6 +430,11 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Current page:', currentPage);
     console.log('Current file:', currentFile);
 
+    // Initialize authentication
+    if (typeof initAuth === 'function') {
+        initAuth();
+    }
+
     // Check if we're on the product list page
     if (currentPage.includes('products.html') ||
         (currentPage.includes('product-detail') === false && document.getElementById('productsGrid'))) {
@@ -438,4 +443,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     // Product detail page initialization is handled in product-detail.html
 });
+
 
