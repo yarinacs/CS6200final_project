@@ -113,7 +113,7 @@ async function handleCheckout() {
         
         // 跳转到my-orders.html并自动加载
         setTimeout(() => {
-            localStorage.setItem('checkoutUserName', userName); window.location.href = 'payment-checkout.html';
+            window.location.href = 'my-orders.html';
         }, 1000);
     } catch (error) {
         alert('❌ Error during checkout: ' + error.message);
@@ -163,26 +163,4 @@ if (typeof window !== 'undefined') {
             displayCartItems();
         }
     });
-}
-
-// 跳转到支付页面（不清空购物车）
-async function goToPayment() {
-    const userNameInput = document.getElementById('userName');
-    const userName = userNameInput ? userNameInput.value.trim() : '';
-    
-    if (!userName) {
-        alert('⚠️ Please enter your name first!');
-        if (userNameInput) userNameInput.focus();
-        return;
-    }
-    
-    const cart = getCart();
-    if (cart.length === 0) {
-        alert('⚠️ Your cart is empty!');
-        return;
-    }
-    
-    // 保存用户名，跳转到支付页面（不清空购物车）
-    localStorage.setItem('checkoutUserName', userName);
-    window.location.href = 'payment-checkout.html';
 }

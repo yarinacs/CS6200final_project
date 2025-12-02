@@ -6,7 +6,8 @@ interface SwnApiGatewayProps {
     productMicroservice: IFunction,
     basketMicroservice: IFunction,
     orderingMicroservices: IFunction,
-    inventoryMicroservice?: IFunction
+    inventoryMicroservice?: IFunction,
+    paymentMicroservice?: IFunction
 }
 
 export class SwnApiGateway extends Construct {    
@@ -18,9 +19,12 @@ export class SwnApiGateway extends Construct {
         this.createBasketApi(props.basketMicroservice);
         this.createOrderApi(props.orderingMicroservices);
         
-        // Add Inventory API
         if (props.inventoryMicroservice) {
             this.createInventoryApi(props.inventoryMicroservice);
+        }
+        
+        if (props.paymentMicroservice) {
+            this.createPaymentApi(props.paymentMicroservice);
         }
     }
 
@@ -105,5 +109,24 @@ export class SwnApiGateway extends Construct {
     
         const inventory = apigw.root.addResource('inventory');
         inventory.addMethod('GET');
+    }
+
+    private createPaymentApi(paymentMicroservice: IFunction) {
+        const apigw = new LambdaRestApi(this, 'paymentApi', {
+            restApiName: 'Payment Service',
+            handler: paymentMicroservice,
+            proxy: false,
+            defaultCorsPreflightOptions: {
+              allowOrigins: ['*'],
+              allowMethods: ['GET', 'OPTIONS'],
+              allowHeaders: ['Content-Type', 'Authorization']
+            }
+        });
+    
+        const payment = apigw.root.addResource('payment');
+        payment.addMethod('GET');
+        
+        const userPayments = payment.addResource('{userName}');
+        userPayments.addMethod('GET');
     }
 }

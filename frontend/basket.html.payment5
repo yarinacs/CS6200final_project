@@ -156,7 +156,7 @@
    
 		    <!-- Checkout Button -->
                     <div class="mt-6">
-                        <button onclick="goToPayment()"
+                        <button onclick="handleCheckout()"
                             class="w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-6 rounded-full shadow-sm transition-transform active:scale-[0.98]">
                             Checkout <i data-lucide="arrow-right" class="w-5 h-5"></i>
                         </button>

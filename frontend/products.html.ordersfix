@@ -45,7 +45,7 @@
               style="position: absolute; top: -8px; right: -8px; font-size: 0.7rem; font-weight: bold; background: var(--primary-color); color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">0</span>
           </div>
         </a>
-        <a href="my-orders.html" class="nav-link" aria-label="Orders">
+        <a href="#" class="nav-link" aria-label="Orders">
           <!-- Clipboard with wavy lines -->
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">

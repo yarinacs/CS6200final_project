@@ -15,16 +15,15 @@ export class SwnMicroservices extends Construct {
   public readonly productMicroservice: NodejsFunction;
   public readonly basketMicroservice: NodejsFunction;
   public readonly orderingMicroservice: NodejsFunction;
+  public readonly inventoryMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: SwnMicroservicesProps) {
     super(scope, id);
 
-    // product microservices
     this.productMicroservice = this.createProductFunction(props.productTable);
-    // basket microservices
     this.basketMicroservice = this.createBasketFunction(props.basketTable);
-    // ordering Microservice
     this.orderingMicroservice = this.createOrderingFunction(props.orderTable);
+    this.inventoryMicroservice = this.createInventoryFunction(props.productTable);
   }
 
   private createProductFunction(productTable: ITable) : NodejsFunction {
@@ -39,14 +38,12 @@ export class SwnMicroservices extends Construct {
       runtime: Runtime.NODEJS_18_X
     }
 
-    // Product microservices lambda function
     const productFunction = new NodejsFunction(this, 'productLambdaFunction', {
       entry: join(__dirname, `/../src/product/index.js`),
       ...nodeJsFunctionProps,
     });
 
     productTable.grantReadWriteData(productFunction); 
-    
     return productFunction;
   }
 
@@ -96,4 +93,24 @@ export class SwnMicroservices extends Construct {
     return orderFunction;
   }
 
+  private createInventoryFunction(productTable: ITable) : NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+        bundling: {
+            externalModules: []
+        },      
+        environment: {
+            PRIMARY_KEY: 'id',
+            DYNAMODB_TABLE_NAME: productTable.tableName,
+        },
+        runtime: Runtime.NODEJS_18_X,
+    }
+
+    const inventoryFunction = new NodejsFunction(this, 'inventoryLambdaFunction', {
+        entry: join(__dirname, `/../src/inventory/index.js`),
+        ...nodeJsFunctionProps,
+    });
+
+    productTable.grantReadWriteData(inventoryFunction);
+    return inventoryFunction;
+  }
 }

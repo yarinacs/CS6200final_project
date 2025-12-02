@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - CS6620</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eaeded;
+        }
+
+        .top-header {
+            background-color: #131921;
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .nav-bar {
+            background-color: #232f3e;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ddd;
+            z-index: 0;
+        }
+
+        .progress-step:first-child::before {
+            left: 50%;
+        }
+
+        .progress-step:last-child::before {
+            right: 50%;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-step.active .step-circle {
+            background: #ffd814;
+            color: #0f1111;
+        }
+
+        .progress-step.completed .step-circle {
+            background: #067d62;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .order-summary {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-total {
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+            margin-top: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0f1111;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #d5d9d9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ffd814;
+            box-shadow: 0 0 0 3px rgba(255,216,20,0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .payment-method {
+            border: 2px solid #d5d9d9;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-method:hover {
+            border-color: #ffd814;
+        }
+
+        .payment-method.selected {
+            border-color: #ffd814;
+            background: #fffdf7;
+        }
+
+        .payment-method-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .place-order-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #ffd814;
+            border: 1px solid #fcd200;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        .place-order-btn:hover {
+            background-color: #f7ca00;
+        }
+
+        .secure-badge {
+            text-align: center;
+            color: #067d62;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-header">
+        <div class="logo" onclick="window.location.href='products.html'">CS6620</div>
+        <div style="flex: 1;"></div>
+        <div style="color: white;">Secure Checkout</div>
+    </div>
+
+    <div class="nav-bar">
+        <a href="products.html">🏠 Products</a>
+        <a href="basket.html">🛒 Shopping Cart</a>
+        <a href="my-orders.html">📦 My Orders</a>
+    </div>
+
+    <div class="container">
+        <div class="payment-container">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-step completed">
+                    <div class="step-circle">✓</div>
+                    <div>Cart</div>
+                </div>
+                <div class="progress-step active">
+                    <div class="step-circle">2</div>
+                    <div>Payment</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle">3</div>
+                    <div>Confirmation</div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="section-title">Order Summary</div>
+            <div class="order-summary" id="orderSummary">
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="section-title">Select Payment Method</div>
+            <div class="payment-methods">
+                <div class="payment-method selected" data-method="credit-card" onclick="selectPaymentMethod('credit-card')">
+                    <div class="payment-method-icon">💳</div>
+                    <div>Credit Card</div>
+                </div>
+                <div class="payment-method" data-method="debit-card" onclick="selectPaymentMethod('debit-card')">
+                    <div class="payment-method-icon">💳</div>
+                    <div>Debit Card</div>
+                </div>
+                <div class="payment-method" data-method="paypal" onclick="selectPaymentMethod('paypal')">
+                    <div class="payment-method-icon">🅿️</div>
+                    <div>PayPal</div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="section-title">Payment Information</div>
+            
+            <div class="form-group">
+                <label>Your Name *</label>
+                <input type="text" id="userName" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label>Card Number *</label>
+                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Expiry Date *</label>
+                    <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="form-group">
+                    <label>CVV *</label>
+                    <input type="text" id="cvv" placeholder="123" maxlength="4">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Billing Address *</label>
+                <input type="text" id="address" placeholder="123 Main Street, City, State 12345">
+            </div>
+
+            <button class="place-order-btn" onclick="placeOrder()">
+                🔒 Place Order & Pay
+            </button>
+
+            <div class="secure-badge">
+                🔒 Your payment information is secure and encrypted
+            </div>
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="cart.js"></script>
+    <script src="api.js"></script>
+    <script>
+        let cart = getCart();
+        let selectedPaymentMethod = 'credit-card';
+        
+        window.onload = () => {
+            displayOrderSummary();
+            
+            // 从localStorage获取用户名
+            const lastUser = localStorage.getItem('checkoutUserName') || '';
+            if (lastUser) {
+                document.getElementById('userName').value = lastUser;
+            }
+        };
+
+        function displayOrderSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.0825;
+            const total = subtotal + tax;
+
+            const itemsList = cart.map(item => 
+                `<div class="summary-item">
+                    <span>${item.productName} × ${item.quantity}</span>
+                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                </div>`
+            ).join('');
+
+            document.getElementById('orderSummary').innerHTML = `
+                ${itemsList}
+                <div class="summary-item" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                    <span>Subtotal</span>
+                    <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tax (8.25%)</span>
+                    <span>$${tax.toFixed(2)}</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Order Total</span>
+                    <span>$${total.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.toggle('selected', el.dataset.method === method);
+            });
+        }
+
+        async function placeOrder() {
+            const userName = document.getElementById('userName').value.trim();
+            const cardNumber = document.getElementById('cardNumber').value.trim();
+            const expiryDate = document.getElementById('expiryDate').value.trim();
+            const cvv = document.getElementById('cvv').value.trim();
+            const address = document.getElementById('address').value.trim();
+
+            // 验证
+            if (!userName || !cardNumber || !expiryDate || !cvv || !address) {
+                alert('⚠️ Please fill in all required fields!');
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('⚠️ Your cart is empty!');
+                window.location.href = 'products.html';
+                return;
+            }
+
+            // 显示处理中
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ Processing Payment...';
+
+            try {
+                // 保存用户名
+                localStorage.setItem('checkoutUserName', userName);
+                
+                // 1. 保存basket到后端
+                await BasketAPI.save(userName, cart);
+                
+                // 2. Checkout（触发订单、库存、支付）
+                await BasketAPI.checkout(userName);
+                
+                // 模拟支付处理时间
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 3. 清空购物车
+                localStorage.removeItem('cart');
+                localStorage.setItem('lastUserName', userName);
+                
+                // 4. 显示成功并跳转
+                alert(`✅ Payment Successful!\n\nOrder placed successfully!\nThank you, ${userName}!`);
+                
+                setTimeout(() => {
+                    window.location.href = 'my-orders.html';
+                }, 1000);
+                
+            } catch (error) {
+                btn.disabled = false;
+                btn.textContent = '🔒 Place Order & Pay';
+                alert('❌ Payment failed: ' + error.message);
+            }
+        }
+
+        // 自动格式化卡号
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardInput = document.getElementById('cardNumber');
+            if (cardInput) {
+                cardInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                    e.target.value = formattedValue;
+                });
+            }
+            
+            const expiryInput = document.getElementById('expiryDate');
+            if (expiryInput) {
+                expiryInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

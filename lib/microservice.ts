@@ -3,11 +3,15 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction, NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { join } from "path";
+import { IQueue } from "aws-cdk-lib/aws-sqs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 interface SwnMicroservicesProps {
     productTable: ITable;
     basketTable: ITable;
     orderTable: ITable;
+    paymentTable: ITable;
+    paymentQueue?: IQueue;
 }
 
 export class SwnMicroservices extends Construct {
@@ -16,6 +20,7 @@ export class SwnMicroservices extends Construct {
   public readonly basketMicroservice: NodejsFunction;
   public readonly orderingMicroservice: NodejsFunction;
   public readonly inventoryMicroservice: NodejsFunction;
+  public readonly paymentMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: SwnMicroservicesProps) {
     super(scope, id);
@@ -24,6 +29,7 @@ export class SwnMicroservices extends Construct {
     this.basketMicroservice = this.createBasketFunction(props.basketTable);
     this.orderingMicroservice = this.createOrderingFunction(props.orderTable);
     this.inventoryMicroservice = this.createInventoryFunction(props.productTable);
+    this.paymentMicroservice = this.createPaymentFunction(props.paymentTable, props.paymentQueue);
   }
 
   private createProductFunction(productTable: ITable) : NodejsFunction {
@@ -112,5 +118,34 @@ export class SwnMicroservices extends Construct {
 
     productTable.grantReadWriteData(inventoryFunction);
     return inventoryFunction;
+  }
+
+  private createPaymentFunction(paymentTable: ITable, paymentQueue?: IQueue) : NodejsFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+        bundling: {
+            externalModules: []
+        },
+        environment: {
+            PRIMARY_KEY: 'paymentId',
+            DYNAMODB_TABLE_NAME: paymentTable.tableName,
+            EVENT_BUSNAME: 'SwnEventBus'
+        },
+        runtime: Runtime.NODEJS_18_X,
+    }
+
+    const paymentFunction = new NodejsFunction(this, 'paymentLambdaFunction', {
+        entry: join(__dirname, `/../src/payment/index.js`),
+        ...nodeJsFunctionProps,
+    });
+
+    paymentTable.grantReadWriteData(paymentFunction);
+
+    if (paymentQueue) {
+      paymentFunction.addEventSource(new SqsEventSource(paymentQueue, {
+        batchSize: 5
+      }));
+    }
+
+    return paymentFunction;
   }
 }

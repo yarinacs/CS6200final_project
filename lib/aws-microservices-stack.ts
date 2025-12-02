@@ -15,26 +15,29 @@ export class AwsMicroservicesStack extends Stack {
     const microservices = new SwnMicroservices(this, 'Microservices', {
       productTable: database.productTable,
       basketTable: database.basketTable,
-      orderTable: database.orderTable
+      orderTable: database.orderTable,
+      paymentTable: database.paymentTable
     });
 
-    // Create separate queues for ordering and inventory
     const queue = new SwnQueue(this, 'Queue', {
       orderingConsumer: microservices.orderingMicroservice,
-      inventoryConsumer: microservices.inventoryMicroservice
+      inventoryConsumer: microservices.inventoryMicroservice,
+      paymentConsumer: microservices.paymentMicroservice
     });
 
     const apigateway = new SwnApiGateway(this, 'ApiGateway', {
       productMicroservice: microservices.productMicroservice,
       basketMicroservice: microservices.basketMicroservice,
       orderingMicroservices: microservices.orderingMicroservice,
-      inventoryMicroservice: microservices.inventoryMicroservice
+      inventoryMicroservice: microservices.inventoryMicroservice,
+      paymentMicroservice: microservices.paymentMicroservice
     });
     
     const eventbus = new SwnEventBus(this, 'EventBus', {
       publisherFuntion: microservices.basketMicroservice,
       orderQueue: queue.orderQueue,
-      inventoryQueue: queue.inventoryQueue
+      inventoryQueue: queue.inventoryQueue,
+      paymentQueue: queue.paymentQueue
     });   
 
   }

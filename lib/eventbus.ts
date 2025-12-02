@@ -8,6 +8,7 @@ interface SwnEventBusProps {
     publisherFuntion: IFunction;
     orderQueue: IQueue;
     inventoryQueue: IQueue;
+    paymentQueue: IQueue;
 }
 
 export class SwnEventBus extends Construct {
@@ -30,9 +31,10 @@ export class SwnEventBus extends Construct {
             ruleName: 'CheckoutBasketRule'
         });
     
-        // Send event to BOTH queues (fan-out pattern)
+        // Fan-out to 3 queues: Order, Inventory, Payment
         checkoutBasketRule.addTarget(new SqsQueue(props.orderQueue));
         checkoutBasketRule.addTarget(new SqsQueue(props.inventoryQueue));
+        checkoutBasketRule.addTarget(new SqsQueue(props.paymentQueue));
         
         bus.grantPutEventsTo(props.publisherFuntion);
     }
