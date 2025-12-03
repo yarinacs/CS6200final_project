@@ -5,7 +5,6 @@ A full-stack e-commerce application built with **5 event-driven microservices**,
 **🎓 Course**: CS6620 - Cloud Computing  
 **🏫 University**: Northeastern University  
 **👥 Team**: Shih-Jui Heh, Xinya Zhou, Tzu-Ying Liu
-
 **📅 Semester**: Fall 2025
 
 ---
