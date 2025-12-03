@@ -6,8 +6,8 @@
 
 // Configuration - REPLACE THESE WITH ACTUAL VALUES AFTER DEPLOYMENT
 const poolData = {
-    UserPoolId: 'us-west-2_z2fBXCYPE',
-    ClientId: '3l010221o7njf89t9f2tdhc96b'
+    UserPoolId: 'us-east-1_AV91wfzjK',
+    ClientId: '3u2rhi1p62bilmoe2ru3ac8neq'
 };
 
 let userPool;

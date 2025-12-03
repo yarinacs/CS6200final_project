@@ -1,0 +1,24 @@
+  private createBasketApi(basketMicroservice: IFunction, userPool: IUserPool) {
+    const apigw = new LambdaRestApi(this, 'basketApi', {
+      restApiName: 'Basket Service',
+      handler: basketMicroservice,
+      proxy: false,
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['*'],
+        allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+        allowHeaders: ['Content-Type', 'Authorization']
+      }
+    });
+
+    const basket = apigw.root.addResource('basket');
+    basket.addMethod('GET');
+    basket.addMethod('POST');
+
+    const singleBasket = basket.addResource('{userName}');
+    singleBasket.addMethod('GET');
+    singleBasket.addMethod('DELETE');
+
+    const basketCheckout = basket.addResource('checkout');
+    basketCheckout.addMethod('POST');
+  }
+

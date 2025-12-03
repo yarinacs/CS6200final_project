@@ -65,17 +65,22 @@ export class SwnApiGateway extends Construct {
       }
     });
 
-    // NO AUTHENTICATION - removed for easier demo
+
     const basket = apigw.root.addResource('basket');
-    basket.addMethod('GET');
-    basket.addMethod('POST');
+    basket.addMethod('GET', undefined, {
+    });
+    basket.addMethod('POST', undefined, {
+    });
 
     const singleBasket = basket.addResource('{userName}');
-    singleBasket.addMethod('GET');
-    singleBasket.addMethod('DELETE');
+    singleBasket.addMethod('GET', undefined, {
+    });
+    singleBasket.addMethod('DELETE', undefined, {
+    });
 
     const basketCheckout = basket.addResource('checkout');
-    basketCheckout.addMethod('POST');
+    basketCheckout.addMethod('POST', undefined, {
+    });
   }
 
   private createOrderApi(orderingMicroservices: IFunction, userPool: IUserPool) {
@@ -90,12 +95,17 @@ export class SwnApiGateway extends Construct {
       }
     });
 
-    // NO AUTHENTICATION - removed for easier demo
+    const authorizer = new CognitoUserPoolsAuthorizer(this, 'OrderApiAuthorizer', {
+      cognitoUserPools: [userPool]
+    });
+
     const order = apigw.root.addResource('order');
-    order.addMethod('GET');
+    order.addMethod('GET', undefined, {
+    });
 
     const singleOrder = order.addResource('{userName}');
-    singleOrder.addMethod('GET');
+    singleOrder.addMethod('GET', undefined, {
+    });
 
     return singleOrder;
   }

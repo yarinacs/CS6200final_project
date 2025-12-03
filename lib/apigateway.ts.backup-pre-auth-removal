@@ -65,17 +65,35 @@ export class SwnApiGateway extends Construct {
       }
     });
 
-    // NO AUTHENTICATION - removed for easier demo
+    const authorizer = new CognitoUserPoolsAuthorizer(this, 'BasketApiAuthorizer', {
+      cognitoUserPools: [userPool]
+    });
+
     const basket = apigw.root.addResource('basket');
-    basket.addMethod('GET');
-    basket.addMethod('POST');
+    basket.addMethod('GET', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    basket.addMethod('POST', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const singleBasket = basket.addResource('{userName}');
-    singleBasket.addMethod('GET');
-    singleBasket.addMethod('DELETE');
+    singleBasket.addMethod('GET', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
+    singleBasket.addMethod('DELETE', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const basketCheckout = basket.addResource('checkout');
-    basketCheckout.addMethod('POST');
+    basketCheckout.addMethod('POST', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
   }
 
   private createOrderApi(orderingMicroservices: IFunction, userPool: IUserPool) {
@@ -90,12 +108,21 @@ export class SwnApiGateway extends Construct {
       }
     });
 
-    // NO AUTHENTICATION - removed for easier demo
+    const authorizer = new CognitoUserPoolsAuthorizer(this, 'OrderApiAuthorizer', {
+      cognitoUserPools: [userPool]
+    });
+
     const order = apigw.root.addResource('order');
-    order.addMethod('GET');
+    order.addMethod('GET', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     const singleOrder = order.addResource('{userName}');
-    singleOrder.addMethod('GET');
+    singleOrder.addMethod('GET', undefined, {
+      authorizer,
+      authorizationType: AuthorizationType.COGNITO,
+    });
 
     return singleOrder;
   }
