@@ -34,27 +34,27 @@ A full-stack e-commerce application built with **5 event-driven microservices**,
 ## 📊 Complete System Architecture
 ```mermaid
 graph TB
-    subgraph "Frontend Layer"
-        UI1[Products Page<br/>Browse & Add to Cart]
-        UI2[Shopping Cart<br/>Checkout]
-        UI3[My Orders<br/>User Order History]
-        UI4[Admin Dashboard<br/>All Orders & Analytics]
+    subgraph "Frontend"
+        UI1[Products Page]
+        UI2[Shopping Cart]
+        UI3[My Orders]
+        UI4[Admin Dashboard]
     end
 
-    subgraph "API Gateway Layer (5 APIs)"
-        API1[Product API]
-        API2[Basket API]
-        API3[Order API]
-        API4[Inventory API]
-        API5[Payment API]
+    subgraph "API Gateway (5 APIs)"
+        API1[Product API<br/>CRUD Operations]
+        API2[Basket API<br/>Cart + Checkout]
+        API3[Order API<br/>Query Orders]
+        API4[Inventory API<br/>Query Stock]
+        API5[Payment API<br/>Query Payments]
     end
 
     subgraph "Lambda Microservices"
-        MS1[Product<br/>Service]
-        MS2[Basket<br/>Service]
-        MS3[Ordering<br/>Service]
-        MS4[Inventory<br/>Service]
-        MS5[Payment<br/>Service]
+        MS1[Product Lambda<br/>Manage Products]
+        MS2[Basket Lambda<br/>Cart + Events]
+        MS3[Ordering Lambda<br/>Create Orders]
+        MS4[Inventory Lambda<br/>Update Stock]
+        MS5[Payment Lambda<br/>Process Payments]
     end
 
     subgraph "Event Processing"
@@ -64,30 +64,44 @@ graph TB
         SQ3[Payment Queue]
     end
 
-    subgraph "Data Persistence"
-        DB1[(Products<br/>DynamoDB)]
-        DB2[(Baskets<br/>DynamoDB)]
-        DB3[(Orders<br/>DynamoDB)]
-        DB4[(Payments<br/>DynamoDB)]
+    subgraph "Data Layer"
+        DB1[(Products<br/>with Stock)]
+        DB2[(Baskets)]
+        DB3[(Orders)]
+        DB4[(Payments)]
     end
 
-    UI1 --> API1 --> MS1 --> DB1
-    UI2 --> API2 --> MS2 --> DB2
-    UI3 --> API3 --> MS3 --> DB3
+    %% Frontend to API
+    UI1 --> API1
+    UI2 --> API2
+    UI3 --> API3
     UI4 --> API3
+    UI4 --> API5
     
-    MS2 -->|Publish Event| EB
-    EB -->|Fan-out| SQ1
-    EB -->|Fan-out| SQ2
-    EB -->|Fan-out| SQ3
+    %% API to Lambda - ALL APIs connect to Lambdas
+    API1 --> MS1
+    API2 --> MS2
+    API3 --> MS3
+    API4 -.->|Query Only| MS4
+    API5 -.->|Query Only| MS5
     
-    SQ1 --> MS3 --> DB3
-    SQ2 --> MS4 --> DB1
-    SQ3 --> MS5 --> DB4
+    %% Lambda to Database
+    MS1 <--> DB1
+    MS2 <--> DB2
+    MS3 --> DB3
+    MS4 -.->|Update Stock| DB1
+    MS5 --> DB4
+    
+    %% Event-driven flow (Async)
+    MS2 ==>|Publish Event| EB
+    EB ==>|Fan-out| SQ1
+    EB ==>|Fan-out| SQ2
+    EB ==>|Fan-out| SQ3
+    
+    SQ1 ==>|Trigger| MS3
+    SQ2 ==>|Trigger| MS4
+    SQ3 ==>|Trigger| MS5
 
-    style UI1 fill:#e1f5ff
-    style UI2 fill:#e1f5ff
-    style UI3 fill:#e1f5ff
     style UI4 fill:#fff3cd
     style MS1 fill:#d4edda
     style MS2 fill:#d4edda
@@ -99,6 +113,19 @@ graph TB
     style SQ2 fill:#fab1a0
     style SQ3 fill:#fab1a0
 ```
+
+**Legend:**
+- Solid lines (→) = Synchronous REST API calls
+- Dashed lines (-.→) = Query-only API access
+- Double lines (=⇒) = Asynchronous event-driven triggers
+
+**Key Architecture Points:**
+
+1. **All 5 APIs connect to their Lambda functions** for synchronous operations
+2. **Inventory & Payment have dual entry points**:
+   - API Gateway (for queries): GET stock levels / payment records
+   - SQS Queue (for processing): UPDATE stock / CREATE payments
+3. **Event fan-out**: 1 checkout → 3 parallel processes
 
 ---
 
