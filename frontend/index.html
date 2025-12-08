@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Commerce - Product Catalog</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script
+    src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.6/dist/amazon-cognito-identity.min.js"></script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">Shop</h1>
+      <nav class="nav">
+        <a href="products.html" class="nav-link" aria-label="Products">
+          <!-- House with wavy awning -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+            </path>
+            <!-- Wavy awning effect (simplified) -->
+            <path d="M2 9c2-1 4 0 6-1s4 0 6-1 4 0 6-1" stroke-width="1.5"></path>
+          </svg>
+        </a>
+        <a href="#" class="nav-link" aria-label="Watchlist">
+          <!-- Heart Icon -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z">
+            </path>
+          </svg>
+        </a>
+        <a href="#" class="nav-link" aria-label="Cart">
+          <!-- Cart with number above -->
+          <div style="position: relative;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"></path>
+            </svg>
+            <span
+              style="position: absolute; top: -8px; right: -8px; font-size: 0.7rem; font-weight: bold; background: var(--primary-color); color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">0</span>
+          </div>
+        </a>
+        <a href="#" class="nav-link" aria-label="Orders">
+          <!-- Clipboard with wavy lines -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            <path d="M8 12c2-0.5 4 0.5 8 0"></path>
+            <path d="M8 16c2-0.5 4 0.5 8 0"></path>
+            <path d="M8 20c2-0.5 4 0.5 6 0"></path>
+          </svg>
+        </a>
+        </a>
+        <a href="#" class="nav-link" id="nav-sign-in"
+          onclick="document.getElementById('auth-modal').style.display='block'" aria-label="Sign In">
+          <!-- Hand-drawn User Profile -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span style="margin-left:5px;">Sign In</span>
+        </a>
+        <a href="#" class="nav-link" id="nav-sign-out" onclick="signOut()" style="display:none;" aria-label="Sign Out">
+          <span style="margin-right:5px;" id="user-email-display"></span>
+          Sign Out
+        </a>
+        <span class="secure-checkout">Secure Checkout</span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <section class="hero" style="text-align: center; padding: 4rem 0;">
+        <h2 class="section-title" style="font-size: 3rem; margin-bottom: 1rem;">All Items on Sale</h2>
+        <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">The Best Shopping Experience
+        </p>
+        <a href="products.html" class="btn btn-primary" style="display: inline-block; width: auto;">Explore All
+          Products</a>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>
+        &copy; 2025 E-Commerce Store. Built with AWS Serverless Microservices.
+      </p>
+    </div>
+  </footer>
+
+  <script src="mock-data.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal"
+    style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4);">
+    <div class="modal-content"
+      style="background-color:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:300px; border-radius:8px;">
+      <span class="close" onclick="document.getElementById('auth-modal').style.display='none'"
+        style="color:#aaa; float:right; font-size:28px; font-weight:bold; cursor:pointer;">&times;</span>
+      <h2>Sign In / Sign Up</h2>
+      <div id="auth-forms">
+        <input type="email" id="auth-email" placeholder="Email" style="width:100%; padding:10px; margin:10px 0;">
+        <input type="password" id="auth-password" placeholder="Password"
+          style="width:100%; padding:10px; margin:10px 0;">
+        <button
+          onclick="signIn(document.getElementById('auth-email').value, document.getElementById('auth-password').value)"
+          class="btn btn-primary" style="width:100%; margin-bottom:10px;">Sign In</button>
+        <button
+          onclick="signUp(document.getElementById('auth-email').value, document.getElementById('auth-password').value)"
+          class="btn btn-secondary" style="width:100%;">Sign Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verify Modal -->
+  <div id="verify-modal" class="modal"
+    style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4);">
+    <div class="modal-content"
+      style="background-color:#fefefe; margin:15% auto; padding:20px; border:1px solid #888; width:300px; border-radius:8px;">
+      <h2>Verify Email</h2>
+      <p>Please enter the verification code sent to your email.</p>
+      <input type="email" id="verify-email" placeholder="Email" readonly
+        style="width:100%; padding:10px; margin:10px 0; background:#eee;">
+      <input type="text" id="verify-code" placeholder="Verification Code"
+        style="width:100%; padding:10px; margin:10px 0;">
+      <button
+        onclick="verify(document.getElementById('verify-email').value, document.getElementById('verify-code').value)"
+        class="btn btn-primary" style="width:100%;">Verify</button>
+    </div>
+  </div>
+</body>
+
+</html>

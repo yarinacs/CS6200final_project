@@ -1,0 +1,146 @@
+let allProducts = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadProducts();
+    updateCartDisplay();
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProducts);
+    }
+});
+
+async function loadProducts() {
+    const loading = document.getElementById('loading');
+    const grid = document.getElementById('productsGrid');
+    const countEl = document.getElementById('productsCount');
+    
+    if (loading) loading.style.display = 'block';
+    
+    try {
+        allProducts = await ProductAPI.getAll();
+        
+        if (loading) loading.style.display = 'none';
+        displayProducts(allProducts);
+        setupCategoryFilters();
+        if (countEl) countEl.textContent = `${allProducts.length} products`;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        if (loading) loading.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    }
+}
+
+function setupCategoryFilters() {
+    const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+    const container = document.getElementById('categoryFilters');
+    
+    if (!container) return;
+    
+    categories.forEach(cat => {
+        const existing = container.querySelector(`[data-category="${cat}"]`);
+        if (!existing) {
+            const btn = document.createElement('button');
+            btn.className = 'category-btn';
+            btn.dataset.category = cat;
+            btn.textContent = cat;
+            btn.onclick = () => filterByCategory(cat);
+            container.appendChild(btn);
+        }
+    });
+}
+
+function filterByCategory(category) {
+    const buttons = document.querySelectorAll('.category-btn');
+    buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+    });
+    
+    if (category === 'all') {
+        displayProducts(allProducts);
+    } else {
+        const filtered = allProducts.filter(p => p.category === category);
+        displayProducts(filtered);
+    }
+}
+
+function displayProducts(products) {
+    const grid = document.getElementById('productsGrid');
+    const noProducts = document.getElementById('noProducts');
+    
+    if (!grid) return;
+    
+    if (products.length === 0) {
+        grid.innerHTML = '';
+        if (noProducts) noProducts.style.display = 'block';
+        return;
+    }
+    
+    if (noProducts) noProducts.style.display = 'none';
+    
+    grid.innerHTML = products.map(product => createProductCard(product)).join('');
+}
+
+function createProductCard(product) {
+    const stock = product.availableStock || 0;
+    let stockBadge, stockClass;
+    
+    if (stock > 20) {
+        stockBadge = `✅ In Stock (${stock})`;
+        stockClass = 'stock-high';
+    } else if (stock > 5) {
+        stockBadge = `⚠️ Low Stock (${stock})`;
+        stockClass = 'stock-medium';
+    } else if (stock > 0) {
+        stockBadge = `🔴 Only ${stock} left!`;
+        stockClass = 'stock-low';
+    } else {
+        stockBadge = '❌ Out of Stock';
+        stockClass = 'stock-out';
+    }
+    
+    const imageUrl = getProductImage(product.name);
+    
+    return `
+        <div class="product-card" style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px;">
+            <img src="${imageUrl}" 
+                 alt="${product.name}" 
+                 onerror="this.src='https://via.placeholder.com/300?text=No+Image'"
+                 style="width: 100%; height: 200px; object-fit: contain; margin-bottom: 15px; background: #f8f8f8; padding: 10px; border-radius: 8px;">
+            
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 10px; min-height: 48px; color: #007185;">
+                ${product.name}
+            </h3>
+            
+            <p style="font-size: 24px; color: #b12704; font-weight: bold; margin-bottom: 10px;">
+                $${product.price.toFixed(2)}
+            </p>
+            
+            <div class="${stockClass}" style="display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 13px; margin-bottom: 10px; font-weight: 600;">
+                ${stockBadge}
+            </div>
+            
+            <p style="font-size: 14px; color: #565959; margin-bottom: 15px; min-height: 40px;">
+                ${product.description || 'No description available'}
+            </p>
+            
+            <button onclick="addToCart('${product.id}', '${product.name}', ${product.price}, ${stock})" 
+                    style="width: 100%; padding: 12px; background: ${stock > 0 ? '#ffd814' : '#e7e9ec'}; border: 1px solid ${stock > 0 ? '#fcd200' : '#ddd'}; border-radius: 8px; cursor: ${stock > 0 ? 'pointer' : 'not-allowed'}; font-weight: 600;"
+                    ${stock <= 0 ? 'disabled' : ''}>
+                ${stock > 0 ? '🛒 Add to Cart' : 'Out of Stock'}
+            </button>
+        </div>
+    `;
+}
+
+function filterProducts() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    
+    const query = searchInput.value.toLowerCase();
+    const filtered = allProducts.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        (p.description && p.description.toLowerCase().includes(query))
+    );
+    displayProducts(filtered);
+}
